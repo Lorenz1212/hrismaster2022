@@ -250,6 +250,11 @@ var APPHANDLER = function(){
       })
     }
     var _loadpage =  function(page){
+                  if(page.split('_')[1]){
+                    val = page.split('_')[1];
+                  }else{
+                    val = false;
+                  }
                   $.ajax({
                     url: base_url+"view/adminpage",
                     type: "POST",
@@ -273,7 +278,7 @@ var APPHANDLER = function(){
                     success: async function(response){
                         if(response){ 
                           $("#kt_content").empty();
-                          $("#kt_content").append(response).promise().done(function(){_initview(page);});
+                          $("#kt_content").append(response).promise().done(function(){_initview(page.split('_')[0]);});
                         }
                     },
                     error: function(xhr,status,error){
@@ -351,7 +356,20 @@ var APPHANDLER = function(){
         }
         case "employee":{
           KTDatatablesDataSourceAjaxServer.init('tbl_members');
+           $("body").delegate(".view_members_user", "click", function(e){
+              let element=$(this);
+              e.stopImmediatePropagation();
+                _loadpage("employee-info_"+element.attr('data-id'));
+          });
           break
+        }
+        case "employee-info":{
+           _ShowHidePassword('show_hide_password');
+          let searchParams = new URLSearchParams(window.location.search);
+          let id = searchParams.get('m_id');
+          console.log(id);
+          //_ajaxrequest(_constructBlockUi('blockPage', false, 'Profile...'), _constructForm(['members', 'view_members_user',id]));
+          break;
         }
        
       }

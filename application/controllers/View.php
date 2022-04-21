@@ -4,13 +4,14 @@ class View extends CI_Controller {
        parent::__construct();
     }
     public function AdminView($view='dashboard'){
+        $view = explode('_', strtolower($view))[0];
         if($this->session->userdata('adminview')){
              $this->load->view('admin/content');
              switch ($view){
                   case 'dashboard':{$this->session->set_userdata('adminview',$view);break;}
                   case 'profile':{$this->session->set_userdata('adminview',$view);break;}  
                   case 'employee':{$this->session->set_userdata('adminview',$view);break;}  
-                  case 'employee_info':{$this->session->set_userdata('adminview',$view);break;}
+                  case 'employee-info':{$this->session->set_userdata('adminview',$view);break;}
                   default: {redirect(base_url().'view/adminview/dashboard');break;} 
              }
         }else{
@@ -19,7 +20,8 @@ class View extends CI_Controller {
    }
     public function adminpage(){
         if($this->input->post('page')){
-               $this->load->view('admin/view/'.$this->input->post('page'));;
+            $view = explode('_', strtolower($this->input->post('page')))[0];
+               $this->load->view('admin/view/'.$view);;
         }
     }
     public function logout(){
