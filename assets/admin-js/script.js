@@ -272,13 +272,13 @@ var APPHANDLER = function(){
                     complete: function(){
                       $("#kt_content").fadeIn(3000);
                       $("html, body").animate({ scrollTop: 0 }, "slow");
-                      $("head > title").empty().append(company_title+" | "+page.toUpperCase());
+                      $("head > title").empty().append(company_title+" | "+page.split('_')[0].charAt(0).toUpperCase()+page.split('_')[0].slice(1));
                        KTApp.unblockPage();
                     },
                     success: async function(response){
                         if(response){ 
                           $("#kt_content").empty();
-                          $("#kt_content").append(response).promise().done(function(){_initview(page.split('_')[0]);});
+                          $("#kt_content").append(response).promise().done(function(){_initview(page.split('_')[0],val);});
                         }
                     },
                     error: function(xhr,status,error){
@@ -320,7 +320,7 @@ var APPHANDLER = function(){
             });  
     };
 
-    var _initview = async function(view){
+    var _initview = async function(view,val){
       _yearpicker();
        _modal_image();
           $('[data-toggle="tooltip"]').tooltip();
@@ -359,15 +359,13 @@ var APPHANDLER = function(){
            $("body").delegate(".view_members_user", "click", function(e){
               let element=$(this);
               e.stopImmediatePropagation();
-                _loadpage("employee-info_"+element.attr('data-id'));
+              _loadpage("employee-info_"+element.attr('data-id'));
           });
           break
         }
         case "employee-info":{
            _ShowHidePassword('show_hide_password');
-          let searchParams = new URLSearchParams(window.location.search);
-          let id = searchParams.get('m_id');
-          console.log(id);
+          console.log(val);
           //_ajaxrequest(_constructBlockUi('blockPage', false, 'Profile...'), _constructForm(['members', 'view_members_user',id]));
           break;
         }
