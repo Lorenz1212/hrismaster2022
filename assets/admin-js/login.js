@@ -245,9 +245,8 @@ var KTLogin = function() {
             validation.validate().then(function(status) {
                 if (status == 'Valid') {
                 let formData = new FormData(element);
-                formData.append("action", btoa("forgot-pass"));
                         $.ajax({
-                              url:  "login-controller/controller.php",
+                              url:  base_url+"authentication/Admin_Login_Forgotpass",
                               type: "POST",
                               data: formData,
                               contentType: false,
@@ -360,9 +359,8 @@ var KTLogin = function() {
             validation.validate().then(function(status) {
                 if (status == 'Valid') {
                      let formData = new FormData(element);
-                formData.append("action", btoa("reset-pass"));
                         $.ajax({
-                              url:  "login-controller/controller.php",
+                              url:  base_url+"authentication/Admin_Login_Resetpass",
                               type: "POST",
                               data: formData,
                               contentType: false,
@@ -389,7 +387,7 @@ var KTLogin = function() {
                                         }
                                         }).then(function() {
                                             element.reset();
-                                            location.replace("../login"); 
+                                            location.replace(base_url+"authentication/adminlogin"); 
                                         });
                                      }else{
                                         Swal.fire("Oopps!", JSON.parse(window.atob(response.payload)), "info"); 

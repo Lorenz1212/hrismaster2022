@@ -1,3 +1,7 @@
+<?php 
+$token = ($_GET['token'] )?$_GET['token'] :"";
+$validator = ($_GET['validator'] )?$_GET['validator'] :"";
+?>
 <!DOCTYPE html>
 <html lang="en">
 	<!--begin::Head-->
@@ -46,13 +50,13 @@
 			                <form class="form" id="kt_login_passReset_form">
 			                    <div class="form-group">
 			                        <!-- <input type="hidden" name="selector" value="<?php echo $selector; ?>"> -->
-			                        <input type="hidden" name="reset_validator" value="<?php echo $_GET['validator'] ?>">
-			                        <input type="hidden" id="reset_token" name="reset_token" value="'.$token.'">
-			                        <input class="form-control h-auto text-white bg-white-o-5 rounded-pill border-0 py-4 px-8" type="password" placeholder="Enter new password" name="password"/>
+			                        <input type="hidden" name="reset_validator" value="<?php echo $validator ?>">
+			                        <input type="hidden" id="reset_token" name="reset_token" value="<?php echo $token ?>">
+			                        <input class="form-control h-auto  rounded-pill border-0 py-4 px-8" type="password" placeholder="Enter new password" name="password"/>
 			                    </div>
 			                    
 			                    <div class="form-group">
-			                        <input class="form-control h-auto text-white bg-white-o-5 rounded-pill border-0 py-4 px-8" type="password" placeholder="Confirm Password" name="cpassword"/>
+			                        <input class="form-control h-auto  rounded-pill border-0 py-4 px-8" type="password" placeholder="Confirm Password" name="cpassword"/>
 			                    </div>
 
 

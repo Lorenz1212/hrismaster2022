@@ -82,6 +82,77 @@ class Authentication_Model extends CI_Model {
               }
             }
           }
+    public function Admin_Login_Forgotpass($email){
+      $email= strtolower($email);
+      $token = bin2hex(random_bytes(32));
+      $hashedToken = md5(hex2bin($token));
+      if($email == 'forgot_pass_in'){
+        $email = $this->appinfo->admin_email();
+      }
+      $hash_email=$this->encryption->encrypt($email);
+      $url = base_url()."authentication/admin_forgotpass?token=".$hash_email."&validator=".$token;
+      $sql = "SELECT fname, email, (SELECT expiry FROM tbl_user_reset_pass WHERE email = '$email' AND status IS NULL AND expiry > NOW() LIMIT 1) AS expiry FROM tbl_administrator WHERE email = '$email' LIMIT 1";
+      $result = $this->db->query($sql)->row();
+      if($result){
+        if(!empty($result->expiry)){
+          return 'Opps, We have already sent you an email to reset your password. Please check your email.';
+          exit();
+        }else{
+          try{
+              $notify = $this->Email_model->notify_user("forgot-pass", $url, strtolower($result->email), $result->fname);
+              $sql = "INSERT INTO tbl_user_reset_pass (email, hash, expiry) VALUES ('$email', '$hashedToken', DATE_ADD(NOW(), INTERVAL 10 MINUTE))";
+              $result = $this->db->query($sql);
+              if($result){
+                return true;
+              }else{
+                return 'Reset password is unavailable at this moment';
+              }
+          }catch(Exception $e){
+            return 'Reset password is unavailable at this moment';
+          }
+        }
+      }else{
+        return "Sorry, We can&apos;t find that email.";
+      }
+    }
+    public function Admin_Login_Resetpass($token, $validator, $password){
+        $password = md5($password);
+        $hashedToken = md5(hex2bin($validator));
+        $email = $this->encryption->decrypt($token);
+        $email = str_replace('"', '', $email);
+
+        if(ctype_xdigit($validator) != true ){
+          return "It seems that this link is invalid.";
+          exit();
+        }else{
+          if(strlen($validator) % 2 != 0 ){
+            return "It seems that this link is invalid.";
+            exit();
+          }else{
+            $sql = "SELECT * FROM tbl_user_reset_pass WHERE email = '$email' AND hash='".$hashedToken."' AND status IS NULL LIMIT 1";
+            $result = $this->db->query($sql)->row();
+            if($result){
+              if($result->expiry < $this->TODAY()){
+                return "This link is already expired!";
+              }else{
+                $sql = "UPDATE tbl_user_reset_pass SET status = '1' WHERE id='".$result->id."'";
+                if($this->db->query($sql)){
+                  $sql = "UPDATE tbl_administrator SET password = '$password' WHERE email = '".$result->email."'";
+                  if($this->db->query($sql)){
+                    return true;
+                  }else{
+                    return false;
+                  }
+                }else{
+                  return false;
+                }
+              }
+            }else{
+              return "It seems that this link is invalid.";
+            }
+          }
+        }
+      }
 
 }
 ?>

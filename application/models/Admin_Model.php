@@ -1,9 +1,9 @@
 <?php 
 class Admin_Model extends CI_Model {
     function __construct() {
-      $cookie = json_decode($this->encryption->decrypt($this->input->cookie('sunlife_admin_user', TRUE)),TRUE);
-      $this->admin_id = element('TREE_ADMIN_ID', $cookie);
-      $this->admin_role = element('TREE_ADMIN_ROLE', $cookie);
+      $cookie = json_decode($this->encryption->decrypt($this->input->cookie($this->appinfo->sess_name().'_admin_user', TRUE)),TRUE);
+      $this->admin_id = element($this->appinfo->sess_name().'_ADMIN_ID', $cookie);
+      $this->admin_role = element($this->appinfo->sess_name().'_ADMIN_ROLE', $cookie);
       $this->admin_remember = $this->session->userdata('admin_days_to_remember');
     }
     private function setCookies($data, $days){
@@ -12,16 +12,16 @@ class Admin_Model extends CI_Model {
     }
     private function _set_data($result){
         $data = array(
-          'TREE_ADMIN_ID'=>$result->id,
-          'TREE_ADMIN_FNAME'=>$result->fname, 
-          'TREE_ADMIN_LNAME'=> $result->lname, 
-          'TREE_ADMIN_UNAME'=>$result->username, 
-          'TREE_ADMIN_EMAIL'=>$result->email, 
-          'TREE_ADMIN_PROFILE' =>$result->profile_img, 
-          'TREE_ADMIN_AdSTATUS'=>md5("active"), 
-          'TREE_ADMIN_TYPE'=>md5('admin'),
-          'TREE_ADMIN_COUNTRY'=>$result->country,
-          'TREE_ADMIN_ROLE_ID'=>$result->role  
+          $this->appinfo->sess_name().'_ADMIN_ID'=>$result->id,
+          $this->appinfo->sess_name().'_ADMIN_FNAME'=>$result->fname, 
+          $this->appinfo->sess_name().'_ADMIN_LNAME'=> $result->lname, 
+          $this->appinfo->sess_name().'_ADMIN_UNAME'=>$result->username, 
+          $this->appinfo->sess_name().'_ADMIN_EMAIL'=>$result->email, 
+          $this->appinfo->sess_name().'_ADMIN_PROFILE' =>$result->profile_img, 
+          $this->appinfo->sess_name().'_ADMIN_AdSTATUS'=>md5("active"), 
+          $this->appinfo->sess_name().'_ADMIN_TYPE'=>md5('admin'),
+          $this->appinfo->sess_name().'_ADMIN_COUNTRY'=>$result->country,
+          $this->appinfo->sess_name().'_ADMIN_ROLE'=>$result->role  
         );
         $this->session->set_userdata($data);
         return $data;
@@ -433,6 +433,63 @@ class Admin_Model extends CI_Model {
           return false;
           break;
       }
+    }
+
+
+     public function Members($type,$val){
+      $type = $this->crud->escape_string($type);
+        $val = $this->customcrypt->getDecrypt(base64_decode($val));
+        $data_country=array();
+        $data_user=array();
+        $data_dash=array();
+        $data_link=array();
+        $accounts=$this->Get_Accounts($this->Get_User_Name($val));
+        switch ($type) {
+          case 'view_members_user':{
+            $sql="SELECT *,(SELECT IFNULL(SUM(amount),0.00) FROM tbl_user_commission WHERE owner='$val' AND status=1 AND (type<>'DS_COMM' AND type<>'WALLET_FUND' AND transfer<>1)) AS user_comm,(SELECT IFNULL(SUM(income),0.00) FROM tbl_payout_details WHERE user_id='$val' AND status='S') AS user_income,(SELECT IFNULL(SUM(amount),0.00) FROM tbl_user_gensales WHERE owner='$val') as generated_sales,(SELECT password FROM tbl_password_override WHERE password_type='member') as password,(SELECT IFNULL(SUM(d.price),0.00)  AS product_gensales  FROM tbl_cart_details d RIGHT JOIN tbl_cart_header h ON d.cart_id=h.id WHERE h.user_id IN ($accounts) AND (d.product_type='BUNDLE' OR d.product_type='ITEM') AND h.cart_type!='package' AND h.cart_type!='package-order' AND (h.status='REQUESTED' OR h.status='PROCESSING' OR h.status='IN-TRANSIT' OR h.status='DELIVERED' OR h.status='COMPLETED' OR h.status='REMITTED')) AS product_gensales,(SELECT direct_login FROM tbl_password_override WHERE password_type='member') as direct_login FROM tbl_user WHERE id='$val'";
+              $this->db->query($sql);
+          if(!$result){
+             return false;
+          }else{
+            $data_user['user']=$result;
+            $data = array();
+                    $n="";
+            if($result['direct_login'] == 1){
+                        $n=$result['password'];
+                    }
+                array_push($data, $result['email'], $this->User_Data('admin_UID'));
+            $token = base64_encode($this->customcrypt->getEncrypt(json_encode($data)));
+              if($token){
+                      if($n != ""){
+                        $data_link['link']=$this->config->Link().'/members/login/?admin_token='.$token.'&user_email='.$result['email'].'&n='.$n; 
+                    }else{
+                        $data_link['link']=$this->config->Link().'/members/login/?admin_token='.$token.'&user_email='.$result['email']; 
+                    }
+                }else{
+                  $data_link['link']=$this->config->Link();
+                }
+            $sql="SELECT * FROM tbl_country WHERE status=1";
+            $result=$this->crud->getData($sql);
+            if(!$result){
+            }else{
+              foreach ($result as $row) {
+                  $data_country['country'][] = array (  
+                      'name' => $row['name'],
+                      'iso' => $row['iso'],
+                      'phonecode' => $row['phonecode'],
+                  );  
+              }
+            }
+          
+            return array_merge($data_user,$data_country,$data_link);
+          }
+          break;
+          }
+
+          default:
+            return false;
+            break;
+        }
     }
 
     //PUBLIC END

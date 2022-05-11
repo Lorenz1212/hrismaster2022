@@ -15,7 +15,7 @@ class Appinfo {
             $this->member_bg = base_url('assets/media/bg/bg-1.jpg');
             $this->member_color = " ";
 
-            //EMAIL SET UP
+            //EMAIL SET UP GMAIL
             $this->protocol = 'smtp';
             $this->smtp_host = 'ssl://smtp.gmail.com';
             $this->smtp_port = '465';
@@ -23,8 +23,7 @@ class Appinfo {
             $this->smtp_pass = 'llqvytzgzeivgfeg';
             $this->mailtype = 'html';
             $this->charset = 'iso-8859-1';
-            $this->web_email ='lorenzcabreros@gmail.com';
-            $this->web_url_forgotpassword = base_url().'authentication/forgot_password';
+            $this->web_email ='HRIS Support Team<support@miracle-tree.org>';
 
             //Creator
             $this->created_by = 'Lorenz Cabreros';
@@ -35,6 +34,7 @@ class Appinfo {
 
             //Company
             $this->app_company = 'HR Service Management';
+            $this->app_company_acronym = 'HRIS';
             $this->app_year = '2022';
             $this->app_location ='Sta. Rosa, Laguna';
 
@@ -76,16 +76,18 @@ class Appinfo {
         }
         public function sess_name(){return $this->sess_name;}
 
-        //EMAIL SET UP
+      
+
+        //EMAIL SET UP FOR GMAIL
         public function smtp_host(){return $this->smtp_host;}
         public function smtp_port(){return $this->smtp_port;}
         public function smtp_user(){return $this->smtp_user;}
         public function smtp_pass(){return $this->smtp_pass;}
         public function mailtype(){return $this->mailtype;}
         public function charset(){return $this->charset;}
+    
 
-        public function web_url_forgotpassword(){return $this->web_url_forgotpassword;}    
-
+        //EMAIL SET UP LOGO
         public function email_logo(){return $this->email_logo;}
         public function app_location(){return $this->web_location;}
         public function web_email(){return $this->web_email;}
@@ -106,9 +108,10 @@ class Appinfo {
         //Web
         public function app_logo(){return $this->app_logo;}
         public function app_company(){return $this->app_company;}
+        public function app_company_acronym(){return $this->app_company_acronym;}
         public function app_year(){return $this->app_year;}
         
-        //COOKIE
+        //COOKIE ADMIN
         public function admin_fullname(){return $this->admin_fname.' '.$this->admin_lname;}
         public function admin_position(){return $this->admin_position;}
         public function admin_email(){return $this->admin_email;}
@@ -122,6 +125,7 @@ class Appinfo {
             return ($this->admin_profile=="default.png") ? '<span class="symbol-label font-size-h5 font-weight-bold text-white bg-white-o-30 text-uppercase">'.($this->admin_letter).'</span>' : '<div class="symbol-label" style="background-image:url(images/profile/'.$this->admin_profile.')"></div>';
         }
 
+        //COOKIE MEMBER
         public function member_fullname(){return $this->member_fname.' '.$this->member_lname;}
         public function member_position(){return $this->member_position;}
         public function member_email(){return $this->member_email;}
@@ -134,5 +138,38 @@ class Appinfo {
         public function member_image(){
             return ($this->member_profile=="default.png") ? '<span class="symbol-label font-size-h5 font-weight-bold text-white bg-white-o-30 text-uppercase">'.($this->member_letter).'</span>' : '<div class="symbol-label" style="background-image:url(images/profile/'.$this->member_profile.')"></div>';
         }
-}
+
+        public function send_email($to, $sender, $html_body, $subject){
+                  $curl = curl_init();
+                  curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                  curl_setopt($curl, CURLOPT_POST, 1);
+                  curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+                  curl_setopt($curl, CURLOPT_URL, "https://api.smtp2go.com/v3/email/send");
+                  curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode(array(
+                      "api_key" => 'api-816BDBEACB6F11ECAD4AF23C91C88F4E',
+                      "to" => array(0 => $to),
+                      "sender" => $sender,
+                      "subject" => $subject,
+                      "html_body" => $html_body,
+                      "text_body" => $subject
+
+                  )));
+                $result = curl_exec($curl);
+                $object = json_decode($result, true);
+                if($object['data']['succeeded'] >= 1){
+                  return true;
+                }else{
+                  return false;
+                }
+         }
+   
+        //PERMISSION ADMIN
+        public function permission_admin($page){
+
+        }
+         //PERMISSION MEMBER
+        public function permission_member($page){
+          
+        }
+} 
 ?>

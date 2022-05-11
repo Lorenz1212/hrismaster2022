@@ -21,7 +21,7 @@ class View extends CI_Controller {
     public function adminpage(){
         if($this->input->post('page')){
             $view = explode('_', strtolower($this->input->post('page')))[0];
-               $this->load->view('admin/view/'.$view);;
+            $this->load->view('admin/view/'.$view);
         }
     }
     public function logout(){
